@@ -10,10 +10,15 @@ import MetalKit
 
 class NBodyViewController: NSViewController, MTKViewDelegate {
 
+  private let WIDTH  = 640
+  private let HEIGHT = 480
+
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    let metalview = MTKView(frame: CGRect(x:0, y:0, width:640, height:480), device: MTLCreateSystemDefaultDevice())
+    self.view.window?.setContentSize(NSSize(width: WIDTH, height: HEIGHT))
+
+    let metalview = MTKView(frame: CGRect(x: 0, y: 0, width: WIDTH, height: HEIGHT), device: MTLCreateSystemDefaultDevice())
     metalview.delegate = self
     view.addSubview(metalview)
   }

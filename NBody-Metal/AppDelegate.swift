@@ -14,12 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var window: NSWindow!
 
   func applicationDidFinishLaunching(aNotification: NSNotification) {
-
-    let width  = 640
-    let height = 480
-
     window.title = "NBody"
-    window.setContentSize(NSSize(width: width, height: height))
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
