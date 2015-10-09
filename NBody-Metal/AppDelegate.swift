@@ -13,15 +13,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   @IBOutlet weak var window: NSWindow!
 
-
   func applicationDidFinishLaunching(aNotification: NSNotification) {
-    // Insert code here to initialize your application
+
+    let width  = 640
+    let height = 480
+
+    window.title = "NBody"
+    window.setContentSize(NSSize(width: width, height: height))
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
     // Insert code here to tear down your application
   }
 
-
+  func applicationShouldTerminateAfterLastWindowClosed(sender: NSApplication) -> Bool {
+    return true
+  }
 }
 
