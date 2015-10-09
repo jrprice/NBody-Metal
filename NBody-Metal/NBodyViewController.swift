@@ -15,7 +15,8 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
   private var queue: MTLCommandQueue!
   private var library: MTLLibrary!
-  private var pipelineState: MTLRenderPipelineState!
+  private var computePipelineState: MTLComputePipelineState!
+  private var renderPipelineState: MTLRenderPipelineState!
 
   private var d_vertices: MTLBuffer!
 
@@ -33,12 +34,19 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     library    = device.newDefaultLibrary()
     metalview.device = device
 
-    let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-    pipelineStateDescriptor.vertexFunction = library.newFunctionWithName("vert")
-    pipelineStateDescriptor.fragmentFunction = library.newFunctionWithName("frag")
-    pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
     do {
-      pipelineState = try device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
+      computePipelineState = try device.newComputePipelineStateWithFunction(library.newFunctionWithName("step")!)
+    }
+    catch {
+      print("Failed to create compute pipeline state")
+    }
+
+    let renderPipelineStateDescriptor = MTLRenderPipelineDescriptor()
+    renderPipelineStateDescriptor.vertexFunction = library.newFunctionWithName("vert")
+    renderPipelineStateDescriptor.fragmentFunction = library.newFunctionWithName("frag")
+    renderPipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
+    do {
+      renderPipelineState = try device.newRenderPipelineStateWithDescriptor(renderPipelineStateDescriptor)
     }
     catch {
       print("Failed to create render pipeline state")
@@ -53,14 +61,23 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     renderPassDescriptor!.colorAttachments[0].loadAction = .Clear
     renderPassDescriptor!.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.2, 1.0)
 
+    let groupsize = MTLSizeMake(1, 1, 1)
+    let numgroups = MTLSizeMake(1, 1, 1)
+
+
     let buffer = queue.commandBuffer()
-    let encoder = buffer.renderCommandEncoderWithDescriptor(renderPassDescriptor!)
 
-    encoder.setRenderPipelineState(pipelineState)
-    encoder.setVertexBuffer(d_vertices, offset: 0, atIndex: 0)
-    encoder.drawPrimitives(.Point, vertexStart: 0, vertexCount: 1)
+    let computeEncoder = buffer.computeCommandEncoder()
+    computeEncoder.setComputePipelineState(computePipelineState)
+    computeEncoder.setBuffer(d_vertices, offset: 0, atIndex: 0)
+    computeEncoder.dispatchThreadgroups(numgroups, threadsPerThreadgroup: groupsize)
+    computeEncoder.endEncoding()
 
-    encoder.endEncoding()
+    let renderEncoder  = buffer.renderCommandEncoderWithDescriptor(renderPassDescriptor!)
+    renderEncoder.setRenderPipelineState(renderPipelineState)
+    renderEncoder.setVertexBuffer(d_vertices, offset: 0, atIndex: 0)
+    renderEncoder.drawPrimitives(.Point, vertexStart: 0, vertexCount: 1)
+    renderEncoder.endEncoding()
 
     buffer.presentDrawable(view.currentDrawable!)
     buffer.commit()

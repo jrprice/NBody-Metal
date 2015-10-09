@@ -9,6 +9,12 @@
 #include <metal_stdlib>
 using namespace metal;
 
+kernel void step(device packed_float3* positions [[buffer(0)]],
+                        uint           i         [[thread_position_in_grid]])
+{
+  positions[0][0] += 0.001;
+}
+
 vertex float4 vert(const device packed_float3* vertices [[buffer(0)]],
                                 unsigned int   vid      [[vertex_id]])
 {
