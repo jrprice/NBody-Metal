@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1A93158D1BC7CFE100703051 /* NBodyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A93158C1BC7CFE100703051 /* NBodyViewController.swift */; settings = {ASSET_TAGS = (); }; };
+		1A93158F1BC7DCC100703051 /* shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 1A93158E1BC7DCC100703051 /* shaders.metal */; settings = {ASSET_TAGS = (); }; };
 		1AE99B2B1BC6BB7800793769 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AE99B2A1BC6BB7800793769 /* AppDelegate.swift */; };
 		1AE99B2D1BC6BB7800793769 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AE99B2C1BC6BB7800793769 /* Assets.xcassets */; };
 		1AE99B301BC6BB7800793769 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1AE99B2E1BC6BB7800793769 /* MainMenu.xib */; };
@@ -15,6 +16,7 @@
 
 /* Begin PBXFileReference section */
 		1A93158C1BC7CFE100703051 /* NBodyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NBodyViewController.swift; sourceTree = "<group>"; };
+		1A93158E1BC7DCC100703051 /* shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = shaders.metal; sourceTree = "<group>"; };
 		1AE99B271BC6BB7800793769 /* NBody-Metal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NBody-Metal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AE99B2A1BC6BB7800793769 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1AE99B2C1BC6BB7800793769 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 				1AE99B2E1BC6BB7800793769 /* MainMenu.xib */,
 				1AE99B311BC6BB7800793769 /* Info.plist */,
 				1A93158C1BC7CFE100703051 /* NBodyViewController.swift */,
+				1A93158E1BC7DCC100703051 /* shaders.metal */,
 			);
 			path = "NBody-Metal";
 			sourceTree = "<group>";
@@ -132,6 +135,7 @@
 			files = (
 				1AE99B2B1BC6BB7800793769 /* AppDelegate.swift in Sources */,
 				1A93158D1BC7CFE100703051 /* NBodyViewController.swift in Sources */,
+				1A93158F1BC7DCC100703051 /* shaders.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

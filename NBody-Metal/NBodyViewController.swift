@@ -14,6 +14,10 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private let HEIGHT = 480
 
   private var queue: MTLCommandQueue!
+  private var library: MTLLibrary!
+  private var pipelineState: MTLRenderPipelineState!
+
+  private var d_vertices: MTLBuffer!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -25,8 +29,23 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     view.addSubview(metalview)
 
     let device = MTLCreateSystemDefaultDevice()!
-    queue = device.newCommandQueue()
+    queue      = device.newCommandQueue()
+    library    = device.newDefaultLibrary()
     metalview.device = device
+
+    let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
+    pipelineStateDescriptor.vertexFunction = library.newFunctionWithName("vert")
+    pipelineStateDescriptor.fragmentFunction = library.newFunctionWithName("frag")
+    pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
+    do {
+      pipelineState = try device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor)
+    }
+    catch {
+      print("Failed to create render pipeline state")
+    }
+
+    let h_vertices:[Float] = [0.0, 0.0, 0.0]
+    d_vertices = device.newBufferWithBytes(h_vertices, length: 12, options: MTLResourceOptions.CPUCacheModeDefaultCache)
   }
 
   func drawInMTKView(view: MTKView) {
@@ -36,6 +55,10 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
     let buffer = queue.commandBuffer()
     let encoder = buffer.renderCommandEncoderWithDescriptor(renderPassDescriptor!)
+
+    encoder.setRenderPipelineState(pipelineState)
+    encoder.setVertexBuffer(d_vertices, offset: 0, atIndex: 0)
+    encoder.drawPrimitives(.Point, vertexStart: 0, vertexCount: 1)
 
     encoder.endEncoding()
 
