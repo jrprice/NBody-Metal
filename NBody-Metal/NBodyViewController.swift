@@ -10,6 +10,7 @@ import MetalKit
 
 class NBodyViewController: NSViewController, MTKViewDelegate {
 
+  private let DEVICE    = 0
   private let WIDTH     = 640
   private let HEIGHT    = 480
   private let RADIUS    = Float(0.8)
@@ -45,7 +46,8 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     metalview.delegate = self
     view.addSubview(metalview)
 
-    let device = MTLCreateSystemDefaultDevice()!
+    let devices = MTLCopyAllDevices()
+    let device = devices[DEVICE]
     queue      = device.newCommandQueue()
     library    = device.newDefaultLibrary()
     metalview.device = device
