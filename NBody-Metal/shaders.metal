@@ -9,10 +9,14 @@
 #include <metal_stdlib>
 using namespace metal;
 
-kernel void step(device float4* positions [[buffer(0)]],
+kernel void step(const device float4* positionsIn  [[buffer(0)]],
+                       device float4* positionsOut [[buffer(1)]],
+                       device float4* velocities   [[buffer(2)]],
                         uint    i         [[thread_position_in_grid]])
 {
-  positions[i][0] += 0.001;
+  float4 pos = positionsIn[i];
+  pos[0] += 0.001;
+  positionsOut[i] = pos;
 }
 
 vertex float4 vert(const device float4*      vertices [[buffer(0)]],

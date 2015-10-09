@@ -21,7 +21,12 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private var computePipelineState: MTLComputePipelineState!
   private var renderPipelineState: MTLRenderPipelineState!
 
-  private var d_positions: MTLBuffer!
+  private var d_positions0: MTLBuffer!
+  private var d_positions1: MTLBuffer!
+  private var d_velocities: MTLBuffer!
+
+  private var d_positionsIn:  MTLBuffer!
+  private var d_positionsOut: MTLBuffer!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -64,7 +69,12 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
       h_positions.append(0.0)
       h_positions.append(1.0)
     }
-    d_positions = device.newBufferWithBytes(h_positions, length: sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    d_positions0 = device.newBufferWithBytes(h_positions, length: sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    d_positions1 = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    d_velocities = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+
+    d_positionsIn = d_positions0
+    d_positionsOut = d_positions1
   }
 
   func drawInMTKView(view: MTKView) {
@@ -79,19 +89,23 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     let numgroups = MTLSizeMake(NBODIES/GROUPSIZE, 1, 1)
     let computeEncoder = buffer.computeCommandEncoder()
     computeEncoder.setComputePipelineState(computePipelineState)
-    computeEncoder.setBuffer(d_positions, offset: 0, atIndex: 0)
+    computeEncoder.setBuffer(d_positionsIn, offset: 0, atIndex: 0)
+    computeEncoder.setBuffer(d_positionsOut, offset: 0, atIndex: 1)
+    computeEncoder.setBuffer(d_velocities, offset: 0, atIndex: 2)
     computeEncoder.dispatchThreadgroups(numgroups, threadsPerThreadgroup: groupsize)
     computeEncoder.endEncoding()
 
     // Vertex and fragment shaders
     let renderEncoder  = buffer.renderCommandEncoderWithDescriptor(renderPassDescriptor!)
     renderEncoder.setRenderPipelineState(renderPipelineState)
-    renderEncoder.setVertexBuffer(d_positions, offset: 0, atIndex: 0)
+    renderEncoder.setVertexBuffer(d_positionsOut, offset: 0, atIndex: 0)
     renderEncoder.drawPrimitives(.Point, vertexStart: 0, vertexCount: NBODIES)
     renderEncoder.endEncoding()
 
     buffer.presentDrawable(view.currentDrawable!)
     buffer.commit()
+
+    swap(&d_positionsIn, &d_positionsOut)
   }
 
   func mtkView(view: MTKView, drawableSizeWillChange size: CGSize) {
