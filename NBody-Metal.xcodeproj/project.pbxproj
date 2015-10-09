@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1A93158D1BC7CFE100703051 /* NBodyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A93158C1BC7CFE100703051 /* NBodyViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		1A93158F1BC7DCC100703051 /* shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 1A93158E1BC7DCC100703051 /* shaders.metal */; settings = {ASSET_TAGS = (); }; };
+		1A9315971BC8381200703051 /* Matrix4.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A9315961BC8381200703051 /* Matrix4.m */; settings = {ASSET_TAGS = (); }; };
 		1AE99B2B1BC6BB7800793769 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AE99B2A1BC6BB7800793769 /* AppDelegate.swift */; };
 		1AE99B2D1BC6BB7800793769 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AE99B2C1BC6BB7800793769 /* Assets.xcassets */; };
 		1AE99B301BC6BB7800793769 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1AE99B2E1BC6BB7800793769 /* MainMenu.xib */; };
@@ -17,6 +18,9 @@
 /* Begin PBXFileReference section */
 		1A93158C1BC7CFE100703051 /* NBodyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NBodyViewController.swift; sourceTree = "<group>"; };
 		1A93158E1BC7DCC100703051 /* shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = shaders.metal; sourceTree = "<group>"; };
+		1A9315901BC8379000703051 /* NBody-Metal-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NBody-Metal-Bridging-Header.h"; sourceTree = "<group>"; };
+		1A9315951BC8381200703051 /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix4.h; path = Matrix4/Matrix4.h; sourceTree = "<group>"; };
+		1A9315961BC8381200703051 /* Matrix4.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Matrix4.m; path = Matrix4/Matrix4.m; sourceTree = "<group>"; };
 		1AE99B271BC6BB7800793769 /* NBody-Metal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NBody-Metal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1AE99B2A1BC6BB7800793769 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1AE99B2C1BC6BB7800793769 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -35,9 +39,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1A9315981BC8381900703051 /* Matrix4 */ = {
+			isa = PBXGroup;
+			children = (
+				1A9315951BC8381200703051 /* Matrix4.h */,
+				1A9315961BC8381200703051 /* Matrix4.m */,
+			);
+			name = Matrix4;
+			sourceTree = "<group>";
+		};
 		1AE99B1E1BC6BB7800793769 = {
 			isa = PBXGroup;
 			children = (
+				1A9315981BC8381900703051 /* Matrix4 */,
 				1AE99B291BC6BB7800793769 /* NBody-Metal */,
 				1AE99B281BC6BB7800793769 /* Products */,
 			);
@@ -60,6 +74,7 @@
 				1AE99B311BC6BB7800793769 /* Info.plist */,
 				1A93158C1BC7CFE100703051 /* NBodyViewController.swift */,
 				1A93158E1BC7DCC100703051 /* shaders.metal */,
+				1A9315901BC8379000703051 /* NBody-Metal-Bridging-Header.h */,
 			);
 			path = "NBody-Metal";
 			sourceTree = "<group>";
@@ -90,6 +105,7 @@
 		1AE99B1F1BC6BB7800793769 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0700;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "James Price";
 				TargetAttributes = {
@@ -134,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1AE99B2B1BC6BB7800793769 /* AppDelegate.swift in Sources */,
+				1A9315971BC8381200703051 /* Matrix4.m in Sources */,
 				1A93158D1BC7CFE100703051 /* NBodyViewController.swift in Sources */,
 				1A93158F1BC7DCC100703051 /* shaders.metal in Sources */,
 			);
@@ -237,12 +254,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "NBody-Metal/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.uob.NBody-Metal";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NBody-Metal/NBody-Metal-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -250,12 +270,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "NBody-Metal/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.uob.NBody-Metal";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "NBody-Metal/NBody-Metal-Bridging-Header.h";
 			};
 			name = Release;
 		};

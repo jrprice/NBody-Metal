@@ -71,15 +71,21 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
 
 struct VertexOut
 {
-  float4 position [[position]];
+  float4 position  [[position]];
   float  pointSize [[point_size]];
 };
 
+struct RenderParams
+{
+  float4x4 vpMatrix;
+};
+
 vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
+                      const device RenderParams &params  [[buffer(1)]],
                                    unsigned int vid      [[vertex_id]])
 {
   VertexOut out;
-  out.position = vertices[vid];
+  out.position = params.vpMatrix * vertices[vid];
   out.pointSize = SIZE;
   return out;
 }

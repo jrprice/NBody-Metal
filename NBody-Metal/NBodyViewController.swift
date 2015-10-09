@@ -31,7 +31,10 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private var d_positionsIn:  MTLBuffer!
   private var d_positionsOut: MTLBuffer!
 
-  private var d_params: MTLBuffer!
+  private var d_computeParams: MTLBuffer!
+  private var d_renderParams: MTLBuffer!
+
+  private var projectionMatrix: Matrix4!
 
   private var frames = 0
   private var lastUpdate:Double = 0
@@ -76,27 +79,37 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     // Initialise positions
     var h_positions = [Float]()
     for _ in 1...NBODIES {
-      let angle = 2.0 * Float(M_PI) * (Float(rand())/Float(RAND_MAX))
-      h_positions.append(RADIUS * cos(angle))
-      h_positions.append(RADIUS * sin(angle))
-      h_positions.append(0.0)
+      let longitude = 2.0 * Float(M_PI) * (Float(rand())/Float(RAND_MAX))
+      let latitude  = acos((2.0 * (Float(rand())/Float(RAND_MAX))) - 1)
+      h_positions.append(RADIUS * sin(latitude) * cos(longitude))
+      h_positions.append(RADIUS * sin(latitude) * sin(longitude))
+      h_positions.append(RADIUS * cos(latitude))
       h_positions.append(1.0)
     }
-    d_positions0 = device.newBufferWithBytes(h_positions, length: sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
-    d_positions1 = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
-    d_velocities = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    let datasize = sizeof(float4)*NBODIES
+    d_positions0 = device.newBufferWithBytes(h_positions, length: datasize, options: .CPUCacheModeDefaultCache)
+    d_positions1 = device.newBufferWithLength(datasize, options: .CPUCacheModeDefaultCache)
+    d_velocities = device.newBufferWithLength(datasize, options: .CPUCacheModeDefaultCache)
 
-    struct Params {
+    struct ComputeParams {
       var nbodies:UInt32  = 0
       var delta:Float     = 0
       var softening:Float = 0
     }
-    var h_params = Params(nbodies: UInt32(NBODIES), delta: DELTA, softening: SOFTENING)
-    d_params = device.newBufferWithBytes(&h_params, length: sizeof(Params), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    var h_computeParams = ComputeParams(nbodies: UInt32(NBODIES), delta: DELTA, softening: SOFTENING)
+    d_computeParams = device.newBufferWithBytes(&h_computeParams, length: sizeof(ComputeParams), options: .CPUCacheModeDefaultCache)
 
-    d_positionsIn = d_positions0
+    d_positionsIn  = d_positions0
     d_positionsOut = d_positions1
 
+
+    // Initialise view-projection matrices
+    let vpMatrix = Matrix4()
+    vpMatrix.translate(0.0, y: 0.0, z: -2.0)
+    projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(55.0), aspectRatio: Float(WIDTH)/Float(HEIGHT), nearZ: 0.01, farZ: 100.0)
+    vpMatrix.multiplyLeft(projectionMatrix)
+
+    d_renderParams = device.newBufferWithBytes(vpMatrix.raw(), length: sizeof(Float)*16, options: .CPUCacheModeDefaultCache)
 
     fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 300, 20))
     fpstext.editable        = false
@@ -138,7 +151,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     computeEncoder.setBuffer(d_positionsIn, offset: 0, atIndex: 0)
     computeEncoder.setBuffer(d_positionsOut, offset: 0, atIndex: 1)
     computeEncoder.setBuffer(d_velocities, offset: 0, atIndex: 2)
-    computeEncoder.setBuffer(d_params, offset: 0, atIndex: 3)
+    computeEncoder.setBuffer(d_computeParams, offset: 0, atIndex: 3)
     computeEncoder.dispatchThreadgroups(numgroups, threadsPerThreadgroup: groupsize)
     computeEncoder.endEncoding()
 
@@ -146,6 +159,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     let renderEncoder  = buffer.renderCommandEncoderWithDescriptor(renderPassDescriptor!)
     renderEncoder.setRenderPipelineState(renderPipelineState)
     renderEncoder.setVertexBuffer(d_positionsOut, offset: 0, atIndex: 0)
+    renderEncoder.setVertexBuffer(d_renderParams, offset: 0, atIndex: 1)
     renderEncoder.drawPrimitives(.Point, vertexStart: 0, vertexCount: NBODIES)
     renderEncoder.endEncoding()
 
