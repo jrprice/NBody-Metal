@@ -67,13 +67,30 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
   positionsOut[i] = ipos + velocity*params.delta;
 }
 
-vertex float4 vert(const device float4*      vertices [[buffer(0)]],
-                                unsigned int vid      [[vertex_id]])
+#define SIZE 10.f
+
+struct VertexOut
 {
-  return vertices[vid];
+  float4 position [[position]];
+  float  pointSize [[point_size]];
+};
+
+vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
+                                   unsigned int vid      [[vertex_id]])
+{
+  VertexOut out;
+  out.position = vertices[vid];
+  out.pointSize = SIZE;
+  return out;
 }
 
-fragment half4 frag()
+fragment half4 frag(float2 pointCoord [[point_coord]])
 {
-  return half4(1.0);
+  float dist = distance(float2(0.5f), pointCoord);
+  if (dist > 0.5)
+    discard_fragment();
+
+  float intensity = (1.f - (dist*2.f)) * 0.6f;
+
+  return half4(intensity, intensity, intensity*0.6, 1.f);
 }
