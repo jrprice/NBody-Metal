@@ -61,6 +61,9 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     renderPipelineStateDescriptor.vertexFunction = library.newFunctionWithName("vert")
     renderPipelineStateDescriptor.fragmentFunction = library.newFunctionWithName("frag")
     renderPipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
+    renderPipelineStateDescriptor.colorAttachments[0].blendingEnabled = true
+    renderPipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = .One
+    renderPipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .One
     do {
       renderPipelineState = try device.newRenderPipelineStateWithDescriptor(renderPipelineStateDescriptor)
     }
@@ -121,7 +124,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
     let renderPassDescriptor = view.currentRenderPassDescriptor
     renderPassDescriptor!.colorAttachments[0].loadAction = .Clear
-    renderPassDescriptor!.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.2, 1.0)
+    renderPassDescriptor!.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.1, 1.0)
 
     let buffer = queue.commandBuffer()
 

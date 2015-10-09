@@ -67,7 +67,7 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
   positionsOut[i] = ipos + velocity*params.delta;
 }
 
-#define SIZE 10.f
+#define SIZE 20.f
 
 struct VertexOut
 {
