@@ -67,7 +67,8 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
   positionsOut[i] = ipos + velocity*params.delta;
 }
 
-#define SIZE 20.f
+#define POINT_SCALE 20.f
+#define SIGHT_RANGE  3.f
 
 struct VertexOut
 {
@@ -92,7 +93,7 @@ vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
   out.position = params.vpMatrix * pos;
 
   float dist = distance(pos.xyz, params.eyePosition);
-  float size = SIZE * (1.f - (dist / 3.f));
+  float size = POINT_SCALE * (1.f - (dist / SIGHT_RANGE));
   out.pointSize = max(size, 0.f);
 
   return out;
