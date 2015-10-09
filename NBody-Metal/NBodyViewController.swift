@@ -80,7 +80,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     var h_positions = [Float]()
     for _ in 1...NBODIES {
       let longitude = 2.0 * Float(M_PI) * (Float(rand())/Float(RAND_MAX))
-      let latitude  = acos((2.0 * (Float(rand())/Float(RAND_MAX))) - 1)
+      let latitude  = acos((2.0 * (Float(rand())/Float(RAND_MAX))) - 1.0)
       h_positions.append(RADIUS * sin(latitude) * cos(longitude))
       h_positions.append(RADIUS * sin(latitude) * sin(longitude))
       h_positions.append(RADIUS * cos(latitude))
@@ -106,10 +106,15 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     // Initialise view-projection matrices
     let vpMatrix = Matrix4()
     vpMatrix.translate(0.0, y: 0.0, z: -2.0)
-    projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(55.0), aspectRatio: Float(WIDTH)/Float(HEIGHT), nearZ: 0.01, farZ: 100.0)
+    projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degreesToRad(55.0), aspectRatio: Float(WIDTH)/Float(HEIGHT), nearZ: 0.1, farZ: 50.0)
     vpMatrix.multiplyLeft(projectionMatrix)
 
-    d_renderParams = device.newBufferWithBytes(vpMatrix.raw(), length: sizeof(Float)*16, options: .CPUCacheModeDefaultCache)
+    var eyePosition = float3(0, 0, 2.0)
+
+    let renderParamsSize = sizeof(matrix_float4x4) + sizeof(Float)*4
+    d_renderParams = device.newBufferWithLength(renderParamsSize, options: .CPUCacheModeDefaultCache)
+    memcpy(d_renderParams.contents(), vpMatrix.raw(), sizeof(matrix_float4x4))
+    memcpy(d_renderParams.contents() + sizeof(matrix_float4x4), &eyePosition, sizeof(float3))
 
     fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 300, 20))
     fpstext.editable        = false

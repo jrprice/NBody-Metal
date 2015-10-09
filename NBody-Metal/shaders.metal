@@ -78,6 +78,7 @@ struct VertexOut
 struct RenderParams
 {
   float4x4 vpMatrix;
+  float3   eyePosition;
 };
 
 vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
@@ -85,8 +86,15 @@ vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
                                    unsigned int vid      [[vertex_id]])
 {
   VertexOut out;
-  out.position = params.vpMatrix * vertices[vid];
-  out.pointSize = SIZE;
+
+  float4 pos = vertices[vid];
+
+  out.position = params.vpMatrix * pos;
+
+  float dist = distance(pos.xyz, params.eyePosition);
+  float size = SIZE * (1.f - (dist / 3.f));
+  out.pointSize = max(size, 0.f);
+
   return out;
 }
 
