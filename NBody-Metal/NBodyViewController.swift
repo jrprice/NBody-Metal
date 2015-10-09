@@ -32,6 +32,10 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
   private var d_params: MTLBuffer!
 
+  private var frames = 0
+  private var lastUpdate:Double = 0
+  private var fpstext: NSTextField!
+
   override func viewDidLoad() {
     super.viewDidLoad()
 
@@ -87,9 +91,34 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
     d_positionsIn = d_positions0
     d_positionsOut = d_positions1
+
+
+    fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 300, 20))
+    fpstext.editable        = false
+    fpstext.bezeled         = false
+    fpstext.selectable      = false
+    fpstext.drawsBackground = false
+    fpstext.textColor       = NSColor.whiteColor()
+    fpstext.stringValue     = ""
+    metalview.addSubview(fpstext)
   }
 
   func drawInMTKView(view: MTKView) {
+
+    // Update FPS
+    frames += 1
+    let now  = getTimestamp()
+    let diff = now - lastUpdate
+    if diff >= 1000 {
+      let fps = (Double(frames) / diff) * 1000
+
+      frames = 0
+      lastUpdate = now
+
+      let strfps = NSString(format: "%.1f", fps)
+      fpstext.stringValue = "FPS: \(strfps)"
+    }
+
     let renderPassDescriptor = view.currentRenderPassDescriptor
     renderPassDescriptor!.colorAttachments[0].loadAction = .Clear
     renderPassDescriptor!.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.2, 1.0)
@@ -122,5 +151,12 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   }
 
   func mtkView(view: MTKView, drawableSizeWillChange size: CGSize) {
+  }
+
+
+  func getTimestamp() -> Double {
+    var tv:timeval = timeval()
+    gettimeofday(&tv, nil)
+    return (Double(tv.tv_sec)*1e3 + Double(tv.tv_usec)*1e-3)
   }
 }
