@@ -116,7 +116,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     memcpy(d_renderParams.contents(), vpMatrix.raw(), sizeof(matrix_float4x4))
     memcpy(d_renderParams.contents() + sizeof(matrix_float4x4), &eyePosition, sizeof(float3))
 
-    fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 300, 20))
+    fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 100, 20))
     fpstext.editable        = false
     fpstext.bezeled         = false
     fpstext.selectable      = false
