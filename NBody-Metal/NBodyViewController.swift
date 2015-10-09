@@ -15,6 +15,8 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private let RADIUS    = Float(0.3)
   private let NBODIES   = 4096
   private let GROUPSIZE = 64
+  private let DELTA     = Float(0.0001)
+  private let SOFTENING = Float(0.1)
 
   private var queue: MTLCommandQueue!
   private var library: MTLLibrary!
@@ -28,7 +30,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private var d_positionsIn:  MTLBuffer!
   private var d_positionsOut: MTLBuffer!
 
-  private var d_nbodies: MTLBuffer!
+  private var d_params: MTLBuffer!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -75,8 +77,13 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     d_positions1 = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
     d_velocities = device.newBufferWithLength(sizeof(float4)*NBODIES, options: MTLResourceOptions.CPUCacheModeDefaultCache)
 
-    var h_nbodies = NBODIES
-    d_nbodies = device.newBufferWithBytes(&h_nbodies, length: sizeof(Int), options: MTLResourceOptions.CPUCacheModeDefaultCache)
+    struct Params {
+      var nbodies:UInt32  = 0
+      var delta:Float     = 0
+      var softening:Float = 0
+    }
+    var h_params = Params(nbodies: UInt32(NBODIES), delta: DELTA, softening: SOFTENING)
+    d_params = device.newBufferWithBytes(&h_params, length: sizeof(Params), options: MTLResourceOptions.CPUCacheModeDefaultCache)
 
     d_positionsIn = d_positions0
     d_positionsOut = d_positions1
@@ -97,7 +104,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     computeEncoder.setBuffer(d_positionsIn, offset: 0, atIndex: 0)
     computeEncoder.setBuffer(d_positionsOut, offset: 0, atIndex: 1)
     computeEncoder.setBuffer(d_velocities, offset: 0, atIndex: 2)
-    computeEncoder.setBuffer(d_nbodies, offset: 0, atIndex: 3)
+    computeEncoder.setBuffer(d_params, offset: 0, atIndex: 3)
     computeEncoder.dispatchThreadgroups(numgroups, threadsPerThreadgroup: groupsize)
     computeEncoder.endEncoding()
 

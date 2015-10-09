@@ -9,6 +9,13 @@
 #include <metal_stdlib>
 using namespace metal;
 
+struct Params
+{
+  uint  nbodies;
+  float delta;
+  float softening;
+};
+
 float4 computeForce(float4 ipos, float4 jpos, float softening);
 
 float4 computeForce(float4 ipos, float4 jpos, float softening)
@@ -24,27 +31,24 @@ float4 computeForce(float4 ipos, float4 jpos, float softening)
 kernel void step(const device   float4* positionsIn  [[buffer(0)]],
                        device   float4* positionsOut [[buffer(1)]],
                        device   float4* velocities   [[buffer(2)]],
-                       constant uint    &nbodies     [[buffer(3)]],
+                       constant Params  &params      [[buffer(3)]],
                                 uint    i            [[thread_position_in_grid]])
 {
-  float softening = 0.1;
-  float delta = 0.0001;
-
   float4 ipos = positionsIn[i];
 
   float4 force = 0.f;
-  for (uint j = 0; j < nbodies; j++)
+  for (uint j = 0; j < params.nbodies; j++)
   {
-    force += computeForce(ipos, positionsIn[j], softening);
+    force += computeForce(ipos, positionsIn[j], params.softening);
   }
 
   // Update velocity
   float4 velocity = velocities[i];
-  velocity       += force * delta;
+  velocity       += force * params.delta;
   velocities[i]   = velocity;
 
   // Update position
-  positionsOut[i] = ipos + velocity*delta;
+  positionsOut[i] = ipos + velocity*params.delta;
 }
 
 vertex float4 vert(const device float4*      vertices [[buffer(0)]],
