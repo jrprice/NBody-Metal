@@ -39,6 +39,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private var frames = 0
   private var lastUpdate:Double = 0
   private var fpstext: NSTextField!
+  private var flopstext: NSTextField!
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -116,30 +117,42 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     memcpy(d_renderParams.contents(), vpMatrix.raw(), sizeof(matrix_float4x4))
     memcpy(d_renderParams.contents() + sizeof(matrix_float4x4), &eyePosition, sizeof(float3))
 
-    fpstext = NSTextField(frame: NSMakeRect(10, CGFloat(HEIGHT)-30, 100, 20))
-    fpstext.editable        = false
-    fpstext.bezeled         = false
-    fpstext.selectable      = false
-    fpstext.drawsBackground = false
-    fpstext.textColor       = NSColor.whiteColor()
-    fpstext.stringValue     = ""
+    fpstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-30, 120, 20))
     metalview.addSubview(fpstext)
+
+    flopstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-50, 120, 20))
+    metalview.addSubview(flopstext)
+  }
+
+  func createInfoText(rect: NSRect) -> NSTextField {
+    let text = NSTextField(frame: rect)
+    text.editable        = false
+    text.bezeled         = false
+    text.selectable      = false
+    text.drawsBackground = false
+    text.textColor       = NSColor.whiteColor()
+    text.stringValue     = ""
+    return text
   }
 
   func drawInMTKView(view: MTKView) {
 
-    // Update FPS
+    // Update FPS and GFLOP/s counters
     frames += 1
     let now  = getTimestamp()
     let diff = now - lastUpdate
     if diff >= 1000 {
       let fps = (Double(frames) / diff) * 1000
+      let strfps = NSString(format: "%.1f", fps)
+      fpstext.stringValue = "FPS: \(strfps)"
+
+      let flopsPerPair = 21.0
+      let gflops = ((Double(frames) * Double(NBODIES) * Double(NBODIES) * flopsPerPair) / diff) * 1000 * 1e-9
+      let strflops = NSString(format: "%.1f", gflops)
+      flopstext.stringValue = "GFLOP/s: \(strflops)"
 
       frames = 0
       lastUpdate = now
-
-      let strfps = NSString(format: "%.1f", fps)
-      fpstext.stringValue = "FPS: \(strfps)"
     }
 
     let renderPassDescriptor = view.currentRenderPassDescriptor
