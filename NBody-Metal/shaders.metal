@@ -21,7 +21,7 @@ float4 computeForce(float4 ipos, float4 jpos, float softening);
 float4 computeForce(float4 ipos, float4 jpos, float softening)
 {
   float4 d      = jpos - ipos;
-  d.w    = 0;
+         d.w    = 0;
   float  distSq = d.x*d.x + d.y*d.y + d.z*d.z + softening*softening;
   float  dist   = sqrt(distSq);
   float  coeff  = jpos.w / (dist*dist*dist);
@@ -36,6 +36,7 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
 {
   float4 ipos = positionsIn[i];
 
+  // Compute force
   float4 force = 0.f;
   for (uint j = 0; j < params.nbodies; j++)
   {
