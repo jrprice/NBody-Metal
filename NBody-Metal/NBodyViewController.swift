@@ -14,7 +14,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
   private let WIDTH     = 640
   private let HEIGHT    = 480
   private let RADIUS    = Float(0.8)
-  private let NBODIES   = 4096
+  private let NBODIES   = 8192
   private let GROUPSIZE = 64
   private let DELTA     = Float(0.0001)
   private let SOFTENING = Float(0.05)
