@@ -25,8 +25,8 @@ float4 computeForce(float4 ipos, float4 jpos, float softening)
   float4 d      = jpos - ipos;
          d.w    = 0;
   float  distSq = d.x*d.x + d.y*d.y + d.z*d.z + softening*softening;
-  float  dist   = sqrt(distSq);
-  float  coeff  = jpos.w / (dist*dist*dist);
+  float  dist   = fast::rsqrt(distSq);
+  float  coeff  = jpos.w * (dist*dist*dist);
   return coeff * d;
 }
 
@@ -49,9 +49,12 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
     scratch[l] = positionsIn[j + l];
     threadgroup_barrier(mem_flags::mem_threadgroup);
 
-    for (uint k = 0; k < WGSIZE; k++)
+    for (uint k = 0; k < WGSIZE;)
     {
-      force += computeForce(ipos, scratch[k], params.softening);
+      force += computeForce(ipos, scratch[k++], params.softening);
+      force += computeForce(ipos, scratch[k++], params.softening);
+      force += computeForce(ipos, scratch[k++], params.softening);
+      force += computeForce(ipos, scratch[k++], params.softening);
     }
   }
 
