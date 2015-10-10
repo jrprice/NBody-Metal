@@ -14,11 +14,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @IBOutlet weak var window: NSWindow!
 
   func applicationDidFinishLaunching(aNotification: NSNotification) {
-    window.title = "NBody"
+    window.title = "NBody-Metal"
   }
 
   func applicationWillTerminate(aNotification: NSNotification) {
-    // Insert code here to tear down your application
   }
 
   func applicationShouldTerminateAfterLastWindowClosed(sender: NSApplication) -> Bool {
