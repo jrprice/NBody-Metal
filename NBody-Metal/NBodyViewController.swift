@@ -38,6 +38,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
   private var frames = 0
   private var lastUpdate:Double = 0
+  private var nametext: NSTextField!
   private var fpstext: NSTextField!
   private var flopstext: NSTextField!
 
@@ -117,10 +118,14 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     memcpy(d_renderParams.contents(), vpMatrix.raw(), sizeof(matrix_float4x4))
     memcpy(d_renderParams.contents() + sizeof(matrix_float4x4), &eyePosition, sizeof(float3))
 
-    fpstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-30, 120, 20))
+    nametext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-30, 300, 20))
+    nametext.stringValue = "Device: \(device.name!)"
+    metalview.addSubview(nametext)
+
+    fpstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-50, 120, 20))
     metalview.addSubview(fpstext)
 
-    flopstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-50, 120, 20))
+    flopstext = createInfoText(NSMakeRect(10, CGFloat(HEIGHT)-70, 120, 20))
     metalview.addSubview(flopstext)
   }
 
@@ -134,6 +139,8 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     text.stringValue     = ""
     return text
   }
+
+  
 
   func drawInMTKView(view: MTKView) {
 
