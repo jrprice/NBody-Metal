@@ -11,7 +11,7 @@ import MetalKit
 private let WIDTH     = 640
 private let HEIGHT    = 480
 private let RADIUS    = Float(0.8)
-private let GROUPSIZE = 64
+private let GROUPSIZE = 64 // must be same as GROUPSIZE in shaders.metal
 private let DELTA     = Float(0.0001)
 private let SOFTENING = Float(0.05)
 private let MAXBODIES = 32768

@@ -9,7 +9,7 @@
 #include <metal_stdlib>
 using namespace metal;
 
-#define WGSIZE 64
+#define GROUPSIZE 64 // must be same as GROUPSIZE in NBodyViewController.swift
 
 struct Params
 {
@@ -39,17 +39,17 @@ kernel void step(const device   float4* positionsIn  [[buffer(0)]],
 {
   float4 ipos = positionsIn[i];
 
-  threadgroup float4 scratch[WGSIZE];
+  threadgroup float4 scratch[GROUPSIZE];
 
   // Compute force
   float4 force = 0.f;
-  for (uint j = 0; j < params.nbodies; j+=WGSIZE)
+  for (uint j = 0; j < params.nbodies; j+=GROUPSIZE)
   {
     threadgroup_barrier(mem_flags::mem_threadgroup);
     scratch[l] = positionsIn[j + l];
     threadgroup_barrier(mem_flags::mem_threadgroup);
 
-    for (uint k = 0; k < WGSIZE;)
+    for (uint k = 0; k < GROUPSIZE;)
     {
       force += computeForce(ipos, scratch[k++], params.softening);
       force += computeForce(ipos, scratch[k++], params.softening);
