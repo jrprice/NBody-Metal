@@ -84,7 +84,9 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     text.selectable      = false
     text.drawsBackground = false
     text.textColor       = NSColor.whiteColor()
+    text.font            = NSFont.boldSystemFontOfSize(14.0)
     text.stringValue     = ""
+
     return text
   }
 
