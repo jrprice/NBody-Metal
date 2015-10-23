@@ -166,9 +166,22 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
       h_velocities[i*4 + 2] = 0.0
       h_velocities[i*4 + 3] = 0.0
     }
+
+    d_positionsIn?.didModifyRange(NSMakeRange(0, sizeof(float4)*nbodies))
+    d_velocities?.didModifyRange(NSMakeRange(0, sizeof(float4)*nbodies))
   }
 
   func initMetal() {
+
+    // Get data from previous device
+    let h_positions  = d_positionsIn?.contents()
+    let h_velocities = d_velocities?.contents()
+    let buffer       = queue?.commandBuffer()
+    let blitEncoder  = buffer?.blitCommandEncoder()
+    blitEncoder?.synchronizeResource(d_positionsIn!)
+    blitEncoder?.synchronizeResource(d_velocities!)
+    blitEncoder?.endEncoding()
+    buffer?.commit()
 
     // Select next device
     let device = MTLCopyAllDevices()[deviceIndex]
@@ -199,22 +212,20 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
       print("Failed to create render pipeline state")
     }
 
-    // Get data from previous device
-    let h_positions  = d_positionsIn?.contents()
-    let h_velocities = d_velocities?.contents()
-
     // Create device buffers
     let datasize = sizeof(float4)*nbodies
-    d_positions0 = device.newBufferWithLength(datasize, options: .CPUCacheModeDefaultCache)
-    d_positions1 = device.newBufferWithLength(datasize, options: .CPUCacheModeDefaultCache)
-    d_velocities = device.newBufferWithLength(datasize, options: .CPUCacheModeDefaultCache)
+    d_positions0 = device.newBufferWithLength(datasize, options: .StorageModeManaged)
+    d_positions1 = device.newBufferWithLength(datasize, options: .StorageModeManaged)
+    d_velocities = device.newBufferWithLength(datasize, options: .StorageModeManaged)
 
     // Copy data from previous device
     if h_positions != nil {
       memcpy(d_positions0!.contents(), h_positions!, datasize)
+      d_positions0?.didModifyRange(NSMakeRange(0, datasize))
     }
     if h_velocities != nil {
       memcpy(d_velocities!.contents(), h_velocities!, datasize)
+      d_velocities?.didModifyRange(NSMakeRange(0, datasize))
     }
 
     d_positionsIn  = d_positions0
