@@ -73,7 +73,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     metalview.addSubview(fpstext)
     metalview.addSubview(flopstext)
 
-    initMetal()
+    initMetal(false)
     initBodies()
   }
 
@@ -171,7 +171,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     d_velocities?.didModifyRange(NSMakeRange(0, sizeof(float4)*nbodies))
   }
 
-  func initMetal() {
+  func initMetal(retainBodies: Bool) {
 
     // Get data from previous device
     let h_positions  = d_positionsIn?.contents()
@@ -182,6 +182,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     blitEncoder?.synchronizeResource(d_velocities!)
     blitEncoder?.endEncoding()
     buffer?.commit()
+    buffer?.waitUntilCompleted()
 
     // Select next device
     let device = MTLCopyAllDevices()[deviceIndex]
@@ -219,13 +220,15 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     d_velocities = device.newBufferWithLength(datasize, options: .StorageModeManaged)
 
     // Copy data from previous device
-    if h_positions != nil {
-      memcpy(d_positions0!.contents(), h_positions!, datasize)
-      d_positions0?.didModifyRange(NSMakeRange(0, datasize))
-    }
-    if h_velocities != nil {
-      memcpy(d_velocities!.contents(), h_velocities!, datasize)
-      d_velocities?.didModifyRange(NSMakeRange(0, datasize))
+    if retainBodies {
+      if h_positions != nil {
+        memcpy(d_positions0!.contents(), h_positions!, datasize)
+        d_positions0?.didModifyRange(NSMakeRange(0, datasize))
+      }
+      if h_velocities != nil {
+        memcpy(d_velocities!.contents(), h_velocities!, datasize)
+        d_velocities?.didModifyRange(NSMakeRange(0, datasize))
+      }
     }
 
     d_positionsIn  = d_positions0
@@ -260,7 +263,7 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
       if ++deviceIndex >= MTLCopyAllDevices().count {
         deviceIndex = 0
       }
-      initMetal()
+      initMetal(true)
     case 15:
       initBodies()
     case 12:
@@ -268,14 +271,14 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     case 27:
       if nbodies > MINBODIES {
         nbodies /= 2
-        initMetal()
+        initMetal(false)
         initBodies()
       }
     case 24:
       if theEvent.modifierFlags.contains(NSEventModifierFlags.ShiftKeyMask) {
         if nbodies < MAXBODIES {
           nbodies *= 2
-          initMetal()
+          initMetal(false)
           initBodies()
         }
       }
