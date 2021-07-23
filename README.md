@@ -1,8 +1,10 @@
 This is a simple N-body simulation with visualisation for exploring the use of Metal for compute and graphics on OS X.
 
-### Usage
+### Building
 
-With Xcode 7, this project should cleanly build and run without any modifications.
+This project uses Swift 5, and has been tested with Xcode 12.
+
+### Usage
 
 The `d` key can be used to cycle through Metal devices.
 
