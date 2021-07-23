@@ -6,6 +6,7 @@
 //  Copyright © 2015 James Price. All rights reserved.
 //
 
+import GLKit
 import MetalKit
 
 private let WIDTH     = 1280
@@ -42,8 +43,6 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
 
   private var d_computeParams: MTLBuffer!
   private var d_renderParams:  MTLBuffer!
-
-  private var projectionMatrix: Matrix4!
 
   private var frames = 0
   private var lastUpdate:Double = 0
@@ -245,16 +244,16 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     d_computeParams = device.makeBuffer(bytes: &h_computeParams, length: MemoryLayout<ComputeParams>.size, options: .cpuCacheModeWriteCombined)
 
     // Initialise view-projection matrices
-    let vpMatrix = Matrix4()
-    vpMatrix!.translate(0.0, y: 0.0, z: -2.0)
-    projectionMatrix = Matrix4.makePerspectiveViewAngle(Matrix4.degrees(toRad: 55.0), aspectRatio: Float(WIDTH)/Float(HEIGHT), nearZ: 0.1, farZ: 50.0)
-    vpMatrix!.multiplyLeft(projectionMatrix)
+    let projectionMatrix = GLKMatrix4MakePerspective(1.0, Float(WIDTH)/Float(HEIGHT), 0.1, 50.0)
+    var vpMatrix = GLKMatrix4Identity
+    vpMatrix = GLKMatrix4Translate(vpMatrix, 0.0, 0.0, -2.0)
+    vpMatrix = GLKMatrix4Multiply(projectionMatrix, vpMatrix)
 
     var eyePosition = float3(0, 0, 2.0)
 
     let renderParamsSize = MemoryLayout<matrix_float4x4>.size + MemoryLayout<float4>.size
     d_renderParams = device.makeBuffer(length: renderParamsSize, options: .cpuCacheModeWriteCombined)
-    memcpy(d_renderParams.contents(), vpMatrix!.raw(), MemoryLayout<matrix_float4x4>.size)
+    memcpy(d_renderParams.contents(), &vpMatrix.m, MemoryLayout<matrix_float4x4>.size)
     memcpy(d_renderParams.contents() + MemoryLayout<matrix_float4x4>.size, &eyePosition, MemoryLayout<float3>.size)
   }
 
