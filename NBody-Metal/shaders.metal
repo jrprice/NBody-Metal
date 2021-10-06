@@ -74,6 +74,7 @@ struct VertexOut
 {
   float4 position  [[position]];
   float  pointSize [[point_size]];
+  float3 color [[user(locn0)]];
 };
 
 struct RenderParams
@@ -96,16 +97,26 @@ vertex VertexOut vert(const device float4*      vertices [[buffer(0)]],
   float size = POINT_SCALE * (1.f - (dist / SIGHT_RANGE));
   out.pointSize = max(size, 0.f);
 
+  if (vid % 2) {
+    out.color = float3(0.4f, 0.4f, 1.f);
+  } else {
+    out.color = float3(1.f, 0.4f, 0.4f);
+  }
+
   return out;
 }
 
-fragment half4 frag(float2 pointCoord [[point_coord]])
+struct FragIn {
+  float3 color [[user(locn0)]];
+};
+
+fragment half4 frag(float2 pointCoord [[point_coord]], FragIn inputs [[stage_in]])
 {
   float dist = distance(float2(0.5f), pointCoord);
   if (dist > 0.5)
     discard_fragment();
 
   float intensity = (1.f - (dist*2.f)) * 0.6f;
-
-  return half4(intensity, intensity, intensity*0.6, 1.f);
+  float3 c = inputs.color * intensity;
+  return half4(c.r, c.g, c.b, 1.f);
 }
