@@ -10,7 +10,7 @@ import GLKit
 import MetalKit
 
 private let WIDTH     = 1280
-private let HEIGHT    = 960
+private let HEIGHT    = 720
 private let RADIUS    = Float(0.6)
 private let GROUPSIZE = 64 // must be same as GROUPSIZE in shaders.metal
 private let DELTA     = Float(0.000025)
@@ -246,10 +246,10 @@ class NBodyViewController: NSViewController, MTKViewDelegate {
     // Initialise view-projection matrices
     let projectionMatrix = GLKMatrix4MakePerspective(1.0, Float(WIDTH)/Float(HEIGHT), 0.1, 50.0)
     var vpMatrix = GLKMatrix4Identity
-    vpMatrix = GLKMatrix4Translate(vpMatrix, 0.0, 0.0, -2.0)
+    vpMatrix = GLKMatrix4Translate(vpMatrix, 0.0, 0.0, -1.5)
     vpMatrix = GLKMatrix4Multiply(projectionMatrix, vpMatrix)
 
-    var eyePosition = float3(0, 0, 2.0)
+    var eyePosition = float3(0, 0, 1.5)
 
     let renderParamsSize = MemoryLayout<matrix_float4x4>.size + MemoryLayout<float4>.size
     d_renderParams = device.makeBuffer(length: renderParamsSize, options: .cpuCacheModeWriteCombined)

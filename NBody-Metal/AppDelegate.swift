@@ -29,7 +29,7 @@ class AppDelegate : NSObject, NSApplicationDelegate {
 
     var frame = window.frame
     frame.size.width = 1280
-    frame.size.height = 980
+    frame.size.height = 720
     window.setFrame(frame, display: true)
     window.minSize = frame.size
     window.maxSize = frame.size
